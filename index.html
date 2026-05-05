@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>緣起之牆 - 聖嚴法師 108 自在語</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #f2ede4;
+            --paper-color: #fffdf9;
+            --accent-color: #8b5e3c;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Noto Serif TC', serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 2px 2px, rgba(139, 94, 60, 0.05) 1px, transparent 0);
+            background-size: 50px 50px;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .wall-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sticker {
+            position: absolute;
+            background: var(--paper-color);
+            padding: 6px;
+            box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid rgba(139, 94, 60, 0.1);
+            transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), box-shadow 0.3s ease;
+            cursor: default;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .sticker-back {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 2px;
+            background: #e8e2d6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .sticker-back img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6; 
+        }
+
+        /* .sticker-torn {
+            clip-path: polygon(
+                0% 2%, 10% 0%, 20% 3%, 30% 1%, 40% 4%, 50% 0%, 60% 2%, 70% 0%, 80% 3%, 90% 1%, 100% 2%,
+                98% 10%, 100% 20%, 97% 30%, 99% 40%, 98% 50%, 100% 60%, 97% 70%, 99% 80%, 98% 90%, 100% 100%,
+                90% 98%, 80% 100%, 70% 97%, 60% 99%, 50% 98%, 40% 100%, 30% 97%, 20% 99%, 10% 98%, 0% 100%,
+                2% 90%, 0% 80%, 3% 70%, 1% 60%, 4% 50%, 0% 40%, 2% 30%, 0% 20%, 3% 10%
+            );
+        } */
+
+        .sticker-torn {
+            /* 將原本 3-4% 的偏移縮減至 0.5% - 1.5% 之間 */
+            clip-path: polygon(
+                0% 1%, 10% 0.5%, 20% 1.2%, 30% 0.5%, 40% 1.5%, 50% 0.5%, 60% 1%, 70% 0.5%, 80% 1.2%, 90% 0.5%, 100% 1%,
+                99.2% 10%, 100% 20%, 98.8% 30%, 99.5% 40%, 98.5% 50%, 100% 60%, 99% 70%, 99.5% 80%, 98.8% 90%, 100% 99%,
+                90% 99.5%, 80% 100%, 70% 98.8%, 60% 99.5%, 50% 99%, 40% 100%, 30% 98.5%, 20% 99.5%, 10% 99%, 0% 100%,
+                0.8% 90%, 0% 80%, 1.2% 70%, 0.5% 60%, 1.5% 50%, 0% 40%, 0.8% 30%, 0% 20%, 1.2% 10%
+            );
+        }
+
+        .sticker.picked {
+            z-index: 3000 !important;
+            box-shadow: 0 0 80px rgba(139, 94, 60, 0.4);
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+            left: 50% !important;
+            top: 50% !important;
+            margin-left: -65px;
+            margin-top: -95px;
+            transform: scale(5) rotateY(180deg) !important;
+        }
+
+        .ui-panel {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .icon-btn {
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #collectionPanel {
+            position: fixed;
+            right: -420px;
+            top: 0;
+            width: 380px;
+            height: 100vh;
+            background: #faf8f5;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+            z-index: 1100;
+            transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 40px 30px;
+            overflow-y: auto;
+        }
+
+        #collectionPanel.open { right: 0; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(40, 30, 20, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+        }
+
+        .fortune-card-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(0.6) translateY(50px);
+            opacity: 0;
+            transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: default;
+        }
+
+        .fortune-card-container.active {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .close-x {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: #8b5e3c;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .close-x:hover {
+            transform: rotate(90deg);
+        }
+
+        .fortune-card {
+            background: var(--paper-color);
+            width: 400px;
+            padding: 45px 35px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+            border: 1px solid rgba(139, 94, 60, 0.1);
+        }
+
+        .illustration-container {
+            width: 100%;
+            height: 220px;
+            background: #fdfcf8;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(139, 94, 60, 0.05);
+        }
+
+        .illustration-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            opacity: 0.9;
+        }
+
+        .draw-btn {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #5d4037;
+            color: #fdfaf0;
+            padding: 18px 50px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            box-shadow: 0 15px 35px rgba(93, 64, 55, 0.4);
+            z-index: 1000;
+            cursor: pointer;
+            transition: all 0.4s;
+            border: none;
+        }
+
+        .draw-btn:hover { background: #4e342e; transform: translateX(-50%) translateY(-5px); }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" loop>
+        <source src="public/image/bgmusic.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="ui-panel">
+        <div class="icon-btn" id="musicBtn" title="靜心音樂">🔇</div>
+        <div class="icon-btn" id="folderBtn" title="智慧存摺">📜</div>
+    </div>
+
+    <button class="draw-btn" id="drawBtn">恭請自在語</button>
+
+    <div class="wall-container" id="wall"></div>
+
+    <div id="collectionPanel">
+        <div class="flex justify-between items-center mb-8 border-b pb-4">
+            <h2 class="text-2xl font-bold text-amber-900">智慧存摺</h2>
+            <span class="cursor-pointer text-3xl text-gray-400" id="closeFolder">&times;</span>
+        </div>
+        <div id="collectionList"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="fortune-card-container" id="modalContainer">
+            <div class="close-x" id="closeX" title="關閉">&times;</div>
+            
+            <div id="captureArea">
+                <div class="fortune-card sticker-torn">
+                    <div class="illustration-container">
+                        <!-- 正面插圖：移除 onerror 方便觀察是否讀取成功 -->
+                        <img src="" id="cardIllustration" alt="禪意插圖">
+                    </div>
+                    <div class="text-amber-700 font-bold mb-2 text-xs tracking-[0.3em] uppercase" id="mType"></div>
+                    <div class="text-xl font-bold mb-5 text-gray-800 leading-snug" id="mTitle"></div>
+                    <div class="text-lg leading-relaxed mb-6 text-gray-600 px-2 whitespace-pre-line" id="mText"></div>
+                    <div class="mt-6 text-[10px] text-amber-900/30 tracking-[0.5em] border-t pt-4">聖嚴法師 · 108自在語</div>
+                </div>
+            </div>
+            <div class="mt-10 flex gap-6">
+                <button class="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full border border-white/30 backdrop-blur-md transition-all" id="downloadBtn">保存啟示</button>
+                <button class="bg-amber-900 hover:bg-amber-800 text-white px-12 py-3 rounded-full shadow-xl transition-all" id="closeModal">法喜受持</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ==========================================
+         * 🚩 圖片更換區 (最終修正版) 🚩
+         * ==========================================
+         */
+
+        // 1. 【卡片背面】 (確認你的 image 資料夾是在 public 裡面)
+        const BACK_IMAGE_URL = "public/image/card-back.png"; 
+
+        /**
+         * 2. 【卡片正面插圖】
+         * 自動生成 108 張圖片路徑
+         */
+        const ILLUSTRATION_MAP = {
+            "default": "public/image/pic-default.png" 
+        };
+
+        // 修正迴圈：拿掉多出來的引號
+        for (let i = 1; i <= 108; i++) {
+            // 這裡原本多了個 "，現在修正了
+            ILLUSTRATION_MAP[i] = `public/image/pic${i}.png`; 
+        }
+
+        /**
+         * 💡 系統邏輯
+         */
+        function getIllustrationUrl(quoteId) {
+            return ILLUSTRATION_MAP[quoteId] || ILLUSTRATION_MAP["default"];
+        }
+
+        const masterQuotes = [
+            { id: 1, type: "108 自在語", title: "需要與想要", text: "需要的不多，想要的太多。" },
+            { id: 2, type: "108 自在語", title: "利人利己", text: "知恩報恩為先，利人便是利己。" },
+            { id: 3, type: "108 自在語", title: "盡心盡力", text: "盡心盡力第一，不爭你我多少。" },
+            { id: 4, type: "108 自在語", title: "慈悲與智慧", text: "慈悲沒有敵人，智慧不起煩惱。" },
+            { id: 5, type: "108 自在語", title: "勤勞最好", text: "忙人時間最多，勤勞健康最好。" },
+            { id: 6, type: "108 自在語", title: "行善快樂", text: "布施的人有福，行善的人快樂。" },
+            { id: 7, type: "108 自在語", title: "心量與自我", text: "心量要大，自我要小。" },
+            { id: 8, type: "108 自在語", title: "提放自如", text: "要能放下，才能提起。\n提放自如，是自在人。" },
+            { id: 9, type: "108 自在語", title: "知福惜福", text: "識人識己識進退，時時身心平安；\n知福惜福多培福，處處廣結善緣。" },
+            { id: 10, type: "108 自在語", title: "智慧種福", text: "提得起放得下，年年吉祥如意；\n用智慧種福田，日日都是好日。" },
+            { id: 11, type: "108 自在語", title: "面帶微笑", text: "身心常放鬆，逢人面帶笑；\n放鬆能使我們身心健康，帶笑容易增進彼此友誼。" },
+            { id: 12, type: "108 自在語", title: "惜言慎語", text: "話到口邊想一想，講話之前慢半拍。\n不是不說，而是要惜言慎語。" },
+            { id: 13, type: "108 自在語", title: "轉苦為樂", text: "在生活中，不妨養成：\n「能有，很好；沒有，也沒關係」的想法，\n便能轉苦為樂，便會比較自在了。" },
+            { id: 14, type: "108 自在語", title: "四安", text: "四安：安心、安身、安家、安業。" },
+            { id: 15, type: "108 自在語", title: "四要", text: "四要：需要、想要、能要、該要。" },
+            { id: 16, type: "108 自在語", title: "四感", text: "四感：感恩、感謝、感化、感動。" },
+            { id: 17, type: "108 自在語", title: "四它", text: "四它：面對它、接受它、處理它、放下它。" },
+            { id: 18, type: "108 自在語", title: "四福", text: "四福：知福、惜福、培福、種福。" },
+            { id: 19, type: "108 自在語", title: "該要才要", text: "能要、該要的才要；\n不能要，不該要的絕對不要。" },
+            { id: 20, type: "108 自在語", title: "感恩報恩", text: "感恩能使我們成長，報恩能助我們成就。" },
+            { id: 21, type: "108 自在語", title: "皆是恩人", text: "感謝給我們機會，順境、逆境，皆是恩人。" },
+            { id: 22, type: "108 自在語", title: "隨喜讚歎", text: "遇到好事，要隨喜、讚歎、鼓勵，並且虛心學習。" },
+            { id: 23, type: "108 自在語", title: "避免口業", text: "少批評、多讚美，是避免造口業的好方法。" },
+            { id: 24, type: "108 自在語", title: "平常心", text: "平常心就是最自在、最愉快的心。" },
+            { id: 25, type: "108 自在語", title: "踏實走路", text: "踏實地走一步路，勝過說一百句空洞的漂亮語。" },
+            { id: 26, type: "108 自在語", title: "自我成長", text: "知道自己的缺點愈多，成長的速度愈快，對自己的信心也就愈堅定。" },
+            { id: 27, type: "108 自在語", title: "多聽少說", text: "多聽多看少說話，快手快腳慢用錢。" },
+            { id: 28, type: "108 自在語", title: "精進奮發", text: "唯有體驗了艱苦的境遇，才會有精進奮發的心。" },
+            { id: 29, type: "108 自在語", title: "踏實做人", text: "踏踏實實做人，心胸要廣大；\n穩穩當當做事，著眼宜深遠。" },
+            { id: 30, type: "108 自在語", title: "享受工作", text: "忙而不亂，累而不疲. 享受工作。" },
+            { id: 31, type: "108 自在語", title: "忙得快樂", text: "忙得快樂，累得歡喜。" },
+            { id: 32, type: "108 自在語", title: "不煩就好", text: "「忙」沒關係，不「煩」就好。" },
+            { id: 33, type: "108 自在語", title: "身心放鬆", text: "工作要趕不要急，身心要松不要緊。" },
+            { id: 34, type: "108 自在語", title: "忙中有序", text: "應該忙中有序的趕工作，不要緊張兮兮的搶時間。" },
+            { id: 35, type: "108 自在語", title: "自利利人", text: "不要以富貴貧賤論成敗得失，只要能盡心盡力來自利利人。" },
+            { id: 36, type: "108 自在語", title: "任勞任怨", text: "任勞者必堪任怨，任事者必遭批評。\n怨言之下有慈忍，批評之中藏金玉。" },
+            { id: 37, type: "108 自在語", title: "隨遇而安", text: "隨遇而安，隨緣奉獻。" },
+            { id: 38, type: "108 自在語", title: "成功三部曲", text: "成功的三部曲是：隨順因緣、把握因緣、創造因緣。" },
+            { id: 39, type: "108 自在語", title: "把握機緣", text: "見有機緣宜把握，沒有機緣要營造，機緣未熟不強求。" },
+            { id: 40, type: "108 自在語", title: "成長經驗", text: "人生的起起落落，都是成長的經驗。" },
+            { id: 41, type: "108 自在語", title: "處理與關懷", text: "用智慧處理事，以慈悲關懷人。" },
+            { id: 42, type: "108 自在語", title: "修正與方便", text: "以智慧時時修正偏差，以慈悲處處給人方便。" },
+            { id: 43, type: "108 自在語", title: "慈悲智慧", text: "慈悲心愈重，智慧愈高，煩惱也就愈少。" },
+            { id: 44, type: "108 自在語", title: "不計得失", text: "面對許多情況，只管用智慧處理事，以慈悲對待人，而不擔心自己的利害得失。" },
+            { id: 45, type: "108 自在語", title: "境隨心轉", text: "心隨境轉是凡夫；境隨心轉是聖賢。" },
+            { id: 46, type: "108 自在語", title: "不游無路", text: "大鴨游出大路，小鴨游出小路，不游就沒有路。" },
+            { id: 47, type: "108 自在語", title: "心轉", text: "山不轉路轉，路不轉人轉，人不轉心轉。" },
+            { id: 48, type: "108 自在語", title: "精進", text: "「精進」不等於拚命，而是努力不懈。" },
+            { id: 49, type: "108 自在語", title: "自在解脫", text: "船過水無痕，鳥飛不留影，成敗得失都不會引起心情的波動，那就是自在解脫。" },
+            { id: 50, type: "108 自在語", title: "方便他人", text: "給人方便等於給自己方便。" },
+            { id: 51, type: "108 自在語", title: "仁者", text: "甘願吃明虧，是仁者；受辱吃暗虧，是愚蠢。" },
+            { id: 52, type: "108 自在語", title: "壓力來源", text: "壓力通常來自對身外事物過於在意，同時也過於在意他人的評斷。" },
+            { id: 53, type: "108 自在語", title: "服務工作", text: "用感恩的心、用報恩的心，來做服務的工作，便不會感到倦怠與疲累。" },
+            { id: 54, type: "108 自在語", title: "感激奉獻", text: "隨時隨地心存感激，以財力、體力、智慧、心力、來做一切的奉獻。" },
+            { id: 55, type: "108 自在語", title: "生活價值", text: "生命的意義是為了服務，生活的價值是為了奉獻。" },
+            { id: 56, type: "108 自在語", title: "人生目標", text: "人生的目標，是來受報、還願、發願的。" },
+            { id: 57, type: "108 自在語", title: "貢獻大小", text: "人的價值，不在壽命的長短，而在貢獻的大小。" },
+            { id: 58, type: "108 自在語", title: "把握現在", text: "過去已成虛幻，未來尚是夢想，把握現在最重要。" },
+            { id: 59, type: "108 自在語", title: "踏實現在", text: "不用牽掛過去，不必擔心未來，踏實於現在，就與過去和未來同在。" },
+            { id: 60, type: "108 自在語", title: "智能定義", text: "智能，不是知識、不是經驗、不是思辯，而是超越自我中心的態度。" },
+            { id: 61, type: "108 自在語", title: "謙虛滿分", text: "積極人生，謙虛滿分；自我愈大，不安愈多。" },
+            { id: 62, type: "108 自在語", title: "安心層次", text: "上等人安心於道，中等人安心於事，下等人安心於名利物慾。" },
+            { id: 63, type: "108 自在語", title: "身份之事", text: "你是有那些身份的人，就應該做那些身份的事。" },
+            { id: 64, type: "108 自在語", title: "把握今天", text: "在安定和諧中、把握精彩的今天，走出新鮮的明天。" },
+            { id: 65, type: "108 自在語", title: "用心", text: "擔心，是多餘的折磨；用心，是安全的動力。" },
+            { id: 66, type: "108 自在語", title: "布施流水", text: "財富如流水，布施如挖井. 井愈深，水愈多；布施的愈多，財富則愈大。" },
+            { id: 67, type: "108 自在語", title: "最好與最壞", text: "面對生活，要有「最好的準備，最壞的打算」。" },
+            { id: 68, type: "108 自在語", title: "無限希望", text: "只要還有一口呼吸在，就有無限的希望，就是最大的財富。" },
+            { id: 69, type: "108 自在語", title: "大菩薩", text: "救苦救難的是菩薩，受苦受難的是大菩薩。" },
+            { id: 70, type: "108 自在語", title: "超越老病", text: "超越生老病苦三原則：活得快樂、病得健康、老得有希望。" },
+            { id: 71, type: "108 自在語", title: "超越死亡", text: "超越死亡三原則：不要尋死、不要怕死、不要等死。" },
+            { id: 72, type: "108 自在語", title: "莊嚴佛事", text: "死亡不是喜事，也不是喪事，而是一件莊嚴的佛事。" },
+            { id: 73, type: "108 自在語", title: "小菩薩", text: "每一個孩子，都是幫助父母成長的小菩薩。" },
+            { id: 74, type: "108 自在語", title: "青少年教育", text: "對青少年，要關心不要擔心，要誘導不要控制，用商量不用權威。" },
+            { id: 75, type: "108 自在語", title: "愛與祝福", text: "愛你的孩子，與其擔心，不如祝福吧。" },
+            { id: 76, type: "108 自在語", title: "夫妻關係", text: "夫妻是倫理的關係，不是「論理」的關係。" },
+            { id: 77, type: "108 自在語", title: "因果觀", text: "現在所得的，是過去所造的，未來所得的，是現在所做的。" },
+            { id: 78, type: "108 自在語", title: "眼光運氣", text: "眼光，是你的智慧；運氣，是你的福德。" },
+            { id: 79, type: "108 自在語", title: "煩惱來源", text: "喜愛的就想佔有，討厭的就會排斥，患得患失，煩惱就來了。" },
+            { id: 80, type: "108 自在語", title: "少欲知足", text: "經常少欲知足的人，才是無虞匱乏的富人。" },
+            { id: 81, type: "108 自在語", title: "心平安", text: "心不平安是真正的苦，身體的病痛不一定是苦。" },
+            { id: 82, type: "108 自在語", title: "持念觀音", text: "明知心不平安是苦事，就趕快以持念「南無觀世音菩薩」來安心吧。" },
+            { id: 83, type: "108 自在語", title: "擁有最好", text: "現在擁有的，就是最好的. 擁有再多也無法滿足，就等於是窮人。" },
+            { id: 84, type: "108 自在語", title: "化解情緒", text: "不要用壓抑來控制情緒，最好用觀想、用佛號、用祈禱，來化解情緒。" },
+            { id: 85, type: "108 自在語", title: "三好運", text: "好話大家說，好事大家做，好運大家轉。" },
+            { id: 88, type: "108 自在語", title: "我來吧", text: "急須要做，正要人做的事，我來吧。" },
+            { id: 89, type: "108 自在語", title: "心口和", text: "我和人和，心和口和，歡歡喜喜有幸福。" },
+            { id: 91, type: "108 自在語", title: "自求心安", text: "自求心安就有平安，關懷他人就有幸福。" },
+            { id: 93, type: "108 自在語", title: "奉獻修行", text: "奉獻即是修行，安心即是成就。" },
+            { id: 97, type: "108 自在語", title: "人際相處", text: "若希望人際關係相處得好，就要把心量放大，多接納人，多包容人。" },
+            { id: 98, type: "108 自在語", title: "心態改變", text: "只要自己的心態改變，環境也會跟著改變，世界上沒有絕對的好與壞。" },
+            { id: 102, type: "108 自在語", title: "戒貪方法", text: "戒貪最好的方法，就是多布施、多奉獻、多與人分享。" },
+            { id: 106, type: "108 自在語", title: "消融煩惱", text: "煩惱消歸自心就有智慧，利益分享他人便是慈悲。" },
+            { id: 107, type: "108 自在語", title: "看世界", text: "用慚愧心看自己，用感恩心看世界。" },
+            { id: 108, type: "108 自在語", title: "淨化人心", text: "淨化人心，少欲知足，淨化社會，關懷他人。" }
+        ];
+
+        const colors = ["#fdfcf0", "#f0f4fd", "#fdf0f0", "#f0fdf4", "#fdf6f0"];
+        let collectedFortunes = JSON.parse(localStorage.getItem('zenQuotesFull')) || [];
+        let isMusicPlaying = false;
+        let stickersData = [];
+
+        const wall = document.getElementById('wall');
+        const bgm = document.getElementById('bgm');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContainer = document.getElementById('modalContainer');
+
+        function initWall() {
+            wall.innerHTML = '';
+            stickersData = [];
+            const count = 65; 
+
+            for (let i = 0; i < count; i++) {
+                const qData = masterQuotes[Math.floor(Math.random() * masterQuotes.length)];
+                const el = document.createElement('div');
+                el.className = 'sticker sticker-torn';
+                
+                const x = Math.random() * (window.innerWidth - 130);
+                const y = Math.random() * (window.innerHeight - 190);
+                const r = Math.random() * 60 - 30;
+                
+                el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width = '130px';
+                el.style.height = '190px';
+                el.style.zIndex = Math.floor(Math.random() * 20);
+
+                el.innerHTML = `
+                    <div class="sticker-back">
+                        <img src="${BACK_IMAGE_URL}" alt="back">
+                    </div>
+                `;
+                
+                wall.appendChild(el);
+                stickersData.push({
+                    el: el, data: qData, x: x, y: y, baseX: x, baseY: y,
+                    rotation: r, vx: 0, vy: 0
+                });
+            }
+            updateStickersPosition();
+        }
+
+        let mouseX = -1000; let mouseY = -1000;
+        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
+        function updateStickersPosition() {
+            stickersData.forEach(s => {
+                const dx = mouseX - (s.x + 65);
+                const dy = mouseY - (s.y + 95);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 200) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (200 - distance) / 200;
+                    s.vx -= Math.cos(angle) * force * 8;
+                    s.vy -= Math.sin(angle) * force * 8;
+                }
+                s.vx += (s.baseX - s.x) * 0.05;
+                s.vy += (s.baseY - s.y) * 0.05;
+                s.vx *= 0.85; s.vy *= 0.85;
+                s.x += s.vx; s.y += s.vy;
+                s.el.style.transform = `translate(${s.x}px, ${s.y}px) rotate(${s.rotation + (s.vx * 1.2)}deg)`;
+            });
+            requestAnimationFrame(updateStickersPosition);
+        }
+
+        function closeModal() {
+            modalContainer.classList.remove('active');
+            setTimeout(() => modalOverlay.style.display = 'none', 400);
+        }
+
+        async function runDrawAnimation() {
+            const btn = document.getElementById('drawBtn');
+            btn.disabled = true;
+            btn.innerText = "誠心感應中...";
+
+            const target = stickersData[Math.floor(Math.random() * stickersData.length)];
+            target.el.classList.add('picked');
+
+            await new Promise(r => setTimeout(r, 1000));
+            showQuote(target.data, true);
+            
+            setTimeout(() => {
+                target.el.classList.remove('picked');
+                btn.disabled = false;
+                btn.innerText = "恭請自在語";
+            }, 1000);
+        }
+
+        function showQuote(q, isNew) {
+            document.getElementById('mType').innerText = q.type;
+            document.getElementById('mTitle').innerText = q.title;
+            document.getElementById('mText').innerText = q.text;
+            
+            const cardImg = document.getElementById('cardIllustration');
+            
+            // 重要：先設定 Source，如果載入失敗會觸發破圖圖示，讓你一眼看出路徑哪裡寫錯
+            cardImg.src = getIllustrationUrl(q.id);
+
+            modalOverlay.style.display = 'flex';
+            setTimeout(() => modalContainer.classList.add('active'), 50);
+
+            if (isNew) {
+                if (!collectedFortunes.find(item => item.id === q.id)) {
+                    collectedFortunes.unshift({ ...q, date: new Date().toLocaleDateString() });
+                    localStorage.setItem('zenQuotesFull', JSON.stringify(collectedFortunes));
+                    updateCollectionUI();
+                }
+            }
+        }
+
+        function updateCollectionUI() {
+            const list = document.getElementById('collectionList');
+            list.innerHTML = collectedFortunes.length === 0 
+                ? `<p class="text-gray-400 text-sm text-center mt-20 italic">誠心感念，法語自來。</p>`
+                : collectedFortunes.map(q => `
+                    <div class="flex items-center gap-4 p-4 border-b border-amber-50 cursor-pointer hover:bg-amber-50/50 transition-colors" onclick='showQuote(${JSON.stringify(q)}, false)'>
+                        <div class="w-12 h-12 bg-amber-50 rounded flex items-center justify-center text-amber-800 font-bold text-xs shrink-0">禪</div>
+                        <div class="overflow-hidden">
+                            <div class="text-amber-900 font-bold text-sm truncate">${q.title}</div>
+                            <div class="text-[10px] text-gray-400 mt-1">${q.date} · ${q.type}</div>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        document.getElementById('closeModal').onclick = closeModal;
+        document.getElementById('closeX').onclick = closeModal;
+        modalOverlay.onclick = function(e) { if (e.target === modalOverlay) closeModal(); };
+        modalContainer.onclick = function(e) { e.stopPropagation(); };
+
+        document.getElementById('drawBtn').onclick = runDrawAnimation;
+        document.getElementById('musicBtn').onclick = function() {
+            if (isMusicPlaying) { bgm.pause(); this.innerText = '🔇'; }
+            else { bgm.play().catch(e => {}); this.innerText = '🎵'; }
+            isMusicPlaying = !isMusicPlaying;
+        };
+        document.getElementById('folderBtn').onclick = () => document.getElementById('collectionPanel').classList.add('open');
+        document.getElementById('closeFolder').onclick = () => document.getElementById('collectionPanel').classList.remove('open');
+
+        document.getElementById('downloadBtn').onclick = (e) => {
+            e.stopPropagation();
+            html2canvas(document.getElementById('captureArea'), { 
+                backgroundColor: '#f2ede4', 
+                scale: 2, 
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `聖嚴法師自在語-${Date.now()}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        };
+
+        window.onresize = initWall;
+        initWall();
+        updateCollectionUI();
+    </script>
+</body>
+</html>
